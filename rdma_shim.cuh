@@ -2,7 +2,7 @@
 #define RDMA_SHIM_CUH
 #include <cstdint>
 
-#include "cuda_utils.h"
+#include "cuda_utils.cuh"
 #include "cuda_runtime.h"
 #include "cuda_memory.cuh"
 #include "device_launch_parameters.h"
@@ -36,17 +36,6 @@ __global__ void rdma_write_with_imm_kernel_multiple(struct rdma_shim_data *data,
 
 
 
-#ifdef __CUDA_ARCH__
-#define HTOBE64(x) BSWAP64(x)
-#define HTOBE32(x) BSWAP32(x)
-#define HTOBE16(x) BSWAP16(x)
-
-#else
-#define HTOBE16(x) htobe16(x)
-#define HTOBE32(x) htobe32(x)
-#define HTOBE64(x) htobe64(x)
-
-#endif
 
 #ifndef DIV_ROUND_UP
 #define DIV_ROUND_UP(n, d) ((n + d - 1) / d)

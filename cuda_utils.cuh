@@ -109,4 +109,7 @@ const int num_colors = sizeof(colors) / sizeof(uint32_t);
 #endif //CUDA_TRACING
 #endif //ndef NVTX_PUSH_RANGE
 
+__host__ void register_cuda_areas(struct rdma_shim_data *data);
+__host__ void register_cuda_driver_data(void * driver_data, size_t driver_data_size);
+
 #endif

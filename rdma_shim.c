@@ -282,6 +282,7 @@ int sizeof_mlx5_qp(){return sizeof(struct mlx5_qp);}
 int sizeof_mlx5_wq(){return sizeof(struct mlx5_wq);}
 int sizeof_mlx5_bf(){return sizeof(struct mlx5_bf);}
 int mlx5_bf_reg_size(struct rdma_shim_data * data) {return data->mctx->bf_reg_size;}
+
 void consume_send_cq(struct rdma_shim_data * data){
     mlx5_consume_send_cq(data->mqp);
 }

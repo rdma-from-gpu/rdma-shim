@@ -1,10 +1,24 @@
 #ifndef RDMA_CUDA_MEMORY_H
 #define RDMA_CUDA_MEMORY_H
 #include <linux/types.h>
+#include "rdma_shim.cuh"
 // Here we have more help functions/macros to operate over CUDA memory
 // Mostly from NVSHSMEM
-#define NVSHMEMI_IBGDA_PTX_OPTIMIZATION_STORE_RELEASE 1
+// #define NVSHMEMI_IBGDA_PTX_OPTIMIZATION_STORE_RELEASE 1
+// THE ABOVE IS DISABLED TO COMPILE ON TESLA T4
 
+
+#ifdef __CUDA_ARCH__
+#define HTOBE64(x) BSWAP64(x)
+#define HTOBE32(x) BSWAP32(x)
+#define HTOBE16(x) BSWAP16(x)
+
+#else
+#define HTOBE16(x) htobe16(x)
+#define HTOBE32(x) htobe32(x)
+#define HTOBE64(x) htobe64(x)
+
+#endif
 
 #define NTOH64(x)                                                              \
     *x = ((*(x)&0xFF00000000000000) >> 56 | (*(x)&0x00FF000000000000) >> 40 |  \
@@ -142,7 +156,7 @@ __device__ static inline void cu_update_dbr(__be32 * dbrec_ptr , uint32_t dbrec_
     __be32 dbrec_val;
 
     // This is equivalent to
-    // WRITE_ONCE(dbrec_ptr, HTOBE32(dbrec_head & 0xffff));
+    WRITE_ONCE(dbrec_ptr, (__be32*) HTOBE32(dbrec_head & 0xffff));
     asm volatile(
         "{\n\t"
         ".reg .b32 mask1;\n\t"

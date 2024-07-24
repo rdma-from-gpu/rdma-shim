@@ -109,7 +109,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 
-add_library(rdma-shim SHARED rdma_shim.c)
+add_library(rdma-shim STATIC rdma_shim.c)
 set_target_properties(rdma-shim PROPERTIES
     LANGUAGE C)
 
@@ -125,38 +125,42 @@ target_link_libraries(rdma-shim
     ibverbs)
 
 
+add_library(rdma-shim-cuda STATIC rdma_shim.cu)
+set_target_properties(rdma-shim-cuda PROPERTIES CUDA_ARCHITECTURES ${CUDA_ARCHITECTURES}
+        CUDA_SEPARABLE_COMPILATION ON
+        POSITION_INDEPENDENT_CODE ON
+        )
 
+target_compile_options(rdma-shim-cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--keep>)
 
-# add_library(rdma_shim_cuda STATIC rdma_shim.cu)
-# set_target_properties(rdma_shim_cuda PROPERTIES CUDA_ARCHITECTURES ${CUDA_ARCHITECTURES}
-#         CUDA_SEPARABLE_COMPILATION ON
-#         POSITION_INDEPENDENT_CODE ON
-#         )
+target_include_directories(rdma-shim-cuda PUBLIC
+    ${RDMA_CORE_INCLUDE}
+    ${RDMA_CORE_INCLUDE_SRC}
+    ${RDMA_CORE_INCLUDE_MLX5})
 
-# target_include_directories(rdma_shim PUBLIC
-#     ${RDMA_CORE_INCLUDE}
-#     ${RDMA_CORE_INCLUDE_SRC}
-#     ${RDMA_CORE_INCLUDE_MLX5})
+target_link_libraries(rdma-shim-cuda
+    mlx5
+    ibverbs
+    cuda
+    rdma-shim
+)
 
-# target_link_libraries(rdma_shim_cuda
-#     mlx5
-#     ibverbs
-#     cuda
-#     rdma_shim
-# )
+add_library(rdma-shim-cuda-shared SHARED rdma_shim.cu)
+set_target_properties(rdma-shim-cuda-shared PROPERTIES CUDA_ARCHITECTURES ${CUDA_ARCHITECTURES}
+        CUDA_SEPARABLE_COMPILATION ON
+        POSITION_INDEPENDENT_CODE ON
+        )
+target_link_libraries(rdma-shim-cuda-shared
+    mlx5
+    ibverbs
+    cuda
+    rdma-shim)
 
-# add_library(rdma_shim_cuda_shared SHARED rdma_shim.cu)
-# set_target_properties(rdma_shim_cuda_shared PROPERTIES CUDA_ARCHITECTURES ${CUDA_ARCHITECTURES}
-#         CUDA_SEPARABLE_COMPILATION ON
-#         POSITION_INDEPENDENT_CODE ON
-#         )
-# target_link_libraries(rdma_shim_cuda)
-
-# target_include_directories(rdma_shim_cuda PUBLIC
-#     glog::glog
-#     ${RDMA_CORE_INCLUDE}
-#     ${RDMA_CORE_INCLUDE_SRC}
-#     ${RDMA_CORE_INCLUDE_MLX5}
-# )
+target_include_directories(rdma-shim-cuda-shared PUBLIC
+    glog::glog
+    ${RDMA_CORE_INCLUDE}
+    ${RDMA_CORE_INCLUDE_SRC}
+    ${RDMA_CORE_INCLUDE_MLX5}
+)
 
 

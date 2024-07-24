@@ -1,9 +1,13 @@
 #include <util/udma_barrier.h>
 #include "rdma_shim.cuh"
 #include "infiniband/mlx5dv.h"
+
+
+#include "cuda_memory.cuh"
 extern "C" {
-//#include "providers/mlx5/mlx5.h"
 #include "rdma_shim.h"
+//#include "providers/mlx5/mlx5.h"
+//#include "rdma_shim.h"
 // #include "rdma.h"
 // #include "rdma-core/providers/mlx5/mlx5.h"
 //#include <providers/mlx5/mlx5dv.h>
