@@ -129,6 +129,7 @@ add_library(rdma-shim-cuda STATIC rdma_shim.cu)
 set_target_properties(rdma-shim-cuda PROPERTIES CUDA_ARCHITECTURES ${CUDA_ARCHITECTURES}
         CUDA_SEPARABLE_COMPILATION ON
         POSITION_INDEPENDENT_CODE ON
+        CUDA_RESOLVE_DEVICE_SYMBOLS ON
         )
 
 target_compile_options(rdma-shim-cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--keep>)
@@ -145,22 +146,22 @@ target_link_libraries(rdma-shim-cuda
     rdma-shim
 )
 
-add_library(rdma-shim-cuda-shared SHARED rdma_shim.cu)
-set_target_properties(rdma-shim-cuda-shared PROPERTIES CUDA_ARCHITECTURES ${CUDA_ARCHITECTURES}
-        CUDA_SEPARABLE_COMPILATION ON
-        POSITION_INDEPENDENT_CODE ON
-        )
-target_link_libraries(rdma-shim-cuda-shared
-    mlx5
-    ibverbs
-    cuda
-    rdma-shim)
+# add_library(rdma-shim-cuda-shared SHARED rdma_shim.cu)
+# set_target_properties(rdma-shim-cuda-shared PROPERTIES CUDA_ARCHITECTURES ${CUDA_ARCHITECTURES}
+#         CUDA_SEPARABLE_COMPILATION ON
+#         POSITION_INDEPENDENT_CODE ON
+#         )
+# target_link_libraries(rdma-shim-cuda-shared
+#     mlx5
+#     ibverbs
+#     cuda
+#     rdma-shim)
 
-target_include_directories(rdma-shim-cuda-shared PUBLIC
-    glog::glog
-    ${RDMA_CORE_INCLUDE}
-    ${RDMA_CORE_INCLUDE_SRC}
-    ${RDMA_CORE_INCLUDE_MLX5}
-)
+# target_include_directories(rdma-shim-cuda-shared PUBLIC
+#     glog::glog
+#     ${RDMA_CORE_INCLUDE}
+#     ${RDMA_CORE_INCLUDE_SRC}
+#     ${RDMA_CORE_INCLUDE_MLX5}
+# )
 
 
