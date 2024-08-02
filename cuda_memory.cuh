@@ -156,7 +156,7 @@ __device__ static inline void cu_update_dbr(__be32 * dbrec_ptr , uint32_t dbrec_
     __be32 dbrec_val;
 
     // This is equivalent to
-    WRITE_ONCE(dbrec_ptr, (__be32*) HTOBE32(dbrec_head & 0xffff));
+    // WRITE_ONCE(dbrec_ptr, (__be32*) HTOBE32(dbrec_head & 0xffff));
     asm volatile(
         "{\n\t"
         ".reg .b32 mask1;\n\t"
