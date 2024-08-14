@@ -4,7 +4,7 @@
 #include "rdma_shim.cuh"
 // Here we have more help functions/macros to operate over CUDA memory
 // Mostly from NVSHSMEM
-// #define NVSHMEMI_IBGDA_PTX_OPTIMIZATION_STORE_RELEASE 1
+#define NVSHMEMI_IBGDA_PTX_OPTIMIZATION_STORE_RELEASE 1
 // THE ABOVE IS DISABLED TO COMPILE ON TESLA T4
 
 

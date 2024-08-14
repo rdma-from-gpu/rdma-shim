@@ -88,5 +88,15 @@ void setup_custom_allocs(void * buffer, size_t size);
 
 
 
+inline void * aligned_32(void* addr)
+{
+    return (void*) (((( (uint64_t)addr + ( (1<<5) -1)) >> 5)) << 5);
+}
+inline uint64_t aligned_size_32(uint64_t size)
+{
+    return (((( (uint64_t)size+ ( (1<<5) -1)) >> 5)) << 5);
+}
+
+
 #endif
 

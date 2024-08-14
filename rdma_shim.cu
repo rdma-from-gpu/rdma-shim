@@ -6,13 +6,6 @@
 #include "cuda_memory.cuh"
 extern "C" {
 #include "rdma_shim.h"
-//#include "providers/mlx5/mlx5.h"
-//#include "rdma_shim.h"
-// #include "rdma.h"
-// #include "rdma-core/providers/mlx5/mlx5.h"
-//#include <providers/mlx5/mlx5dv.h>
-// #include <providers/mlx5/mlx5.h>
-//#include <providers/mlx5/wqe.h>
 }
 //__forceinline__
 __device__ __host__ struct mlx5_wqe_ctrl_seg *
@@ -74,6 +67,16 @@ write_doorbell_cqe(struct rdma_shim_data *data) {
         htobe32(*data->cons_index & 0xffffff);
 #endif
 }
+
+
+/////////////////////////////////////////////////////////////////
+// This is the core of the library
+// This function implements an rdma write with code that can 
+// be run either on the CPU or on the GPU.
+// Note this would can be called only in a kernel when running on the GPU
+// So we would need a wrapper for it when called directly
+/////////////////////////////////////////////////////////////////
+
 
 //__global__
 __device__ __host__ void
@@ -147,6 +150,9 @@ rdma_write_with_imm_cu(struct rdma_shim_data *data, void *buffer,
     // TODO: Handle locks!
     // mlx5_unlock_qp(mqp); // Not on CUDA (?)
 }
+
+// This is a wrapper to the above, allowing to pipeline the function as a kernel
+// Running on the GPU.
 __global__ void rdma_write_with_imm_kernel(struct rdma_shim_data *data,
                                            void *buffer, size_t size,
                                            uint32_t buffer_lkey,
@@ -156,6 +162,8 @@ __global__ void rdma_write_with_imm_kernel(struct rdma_shim_data *data,
                            imm, signaled);
 }
 
+
+// Consume CQ events, so that we don't overflow the NIC queues
 __host__ __device__ void consume_cqe_cu(struct rdma_shim_data *data) {
     // TODO: This is a "ignorant" method: it consumes anything.
     // Without actually checking validity nor if there is (or not) 
@@ -196,10 +204,15 @@ __host__ __device__ void consume_cqe_cu(struct rdma_shim_data *data) {
     *data->sq_tail = (*data->wqe_head)[idx] + 1;
     write_doorbell_cqe(data);
 }
+
+// As above, a wrapper
 __global__ void consume_cqe_kernel(struct rdma_shim_data *data) {
     consume_cqe_cu(data);
 }
 
+
+
+// This extracts releant memory areads, which needs to be registered with CUDA
 __host__ void register_cuda_areas(struct rdma_shim_data *data) {
     printf("data is %p, data->mqp is %p\n", data, data->mqp);
     // CUDA_HOST_REGISTER_PRINT(data, sizeof(struct rdma_shim_data),
@@ -241,6 +254,9 @@ __host__ void register_cuda_areas(struct rdma_shim_data *data) {
                              cudaHostRegisterMapped | cudaHostRegisterPortable,
                              "sq_buf");
 }
+
+
+// This is a generic registration for the "big" data area
 __host__ void register_cuda_driver_data(void *driver_data,
                                         size_t driver_data_size) {
     CUDA_HOST_REGISTER_PRINT((driver_data), driver_data_size,
@@ -249,6 +265,8 @@ __host__ void register_cuda_driver_data(void *driver_data,
 }
 
 
+
+// This is a kernel that run multiple writes in a single batch (e.g. inside the same kernel)
 __global__ void rdma_write_with_imm_kernel_multiple(struct rdma_shim_data *data,
                                                     void *buffer, size_t size,
                                                     uint32_t buffer_lkey,

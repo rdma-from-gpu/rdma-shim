@@ -1,5 +1,15 @@
-#include "cuda_utils.h"
+#include <util/udma_barrier.h>
+#include "rdma_shim.cuh"
+#include "infiniband/mlx5dv.h"
 
+
+#include "cuda_memory.cuh"
+extern "C" {
+#include "rdma_shim.h"
+}
+
+
+// This extracts relevant memory areas, which needs to be registered with CUDA
 __host__ void register_cuda_areas(struct rdma_shim_data *data) {
     printf("data is %p, data->mqp is %p\n", data, data->mqp);
     // CUDA_HOST_REGISTER_PRINT(data, sizeof(struct rdma_shim_data),
@@ -41,9 +51,13 @@ __host__ void register_cuda_areas(struct rdma_shim_data *data) {
                              cudaHostRegisterMapped | cudaHostRegisterPortable,
                              "sq_buf");
 }
+
+
+// This is a generic registration for the "big" data area
 __host__ void register_cuda_driver_data(void *driver_data,
                                         size_t driver_data_size) {
     CUDA_HOST_REGISTER_PRINT((driver_data), driver_data_size,
                              cudaHostRegisterMapped | cudaHostRegisterPortable,
                              "driver_data");
 }
+

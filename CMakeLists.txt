@@ -5,12 +5,25 @@ project(rdma_from_gpu)
 ## TODO Use parameters
 set(ENV{CUDA_PATH} "/usr/local/cuda")
 #set_property(GLOBAL PROPERTY CUDA_ARCHITECTURES "75;80;89")
-set(CUDA_ARCHITECTURES "75")
 #find_package(CUDA)
 #find_package(CUDAToolkit)
 
+
+# We do this here so cmake doesn't complain (much)
+option(CUDA_ARCHITECTURES "CUDA architectures to pass to NVCC")
+if (CUDA_ARCHITECTURES)
+    set(CUDA_ARCHITECTURES ${CUDA_ARCHITECTURES})
+    set_property(GLOBAL PROPERTY CUDA_ARCHITECTURES "154")#${CUDA_ARCHITECTURES})
+else ()
+    set(CUDA_ARCHITECTURES "75;80;89")
+    set_property(GLOBAL PROPERTY CUDA_ARCHITECTURES "75;80;89")
+endif (CUDA_ARCHITECTURES)
+unset(CUDA_ARCHITECTURES CACHE)
+
+
 project(rdma_from_gpu LANGUAGES  C CXX CUDA)
-#set_property(GLOBAL PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+set_property(GLOBAL PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+set(CUDA_SEPARABLE_COMPILATION ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -fdiagnostics-color=auto")
 #set(CXX "g++-8")
@@ -21,7 +34,7 @@ set (CMAKE_CXX_STANDARD 17)
 
 if (CMAKE_BUILD_TYPE STREQUAL "" OR (CMAKE_BUILD_TYPE STREQUAL "Release"))
     set(CMAKE_BUILD_TYPE Release)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 else ()
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og -g -fno-inline")
@@ -52,10 +65,10 @@ unset(CCACHE CACHE)
 
 option(CUDA_TRACING "Enable NVTX calls to trace and profile with CUDA Nsight" OFF)
 if (CUDA_TRACING)
-        message("Enable NVTX calls to trace and profile with CUDA Nsight")
-        #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCUDA_TRACING=1")
-        #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -DCUDA_TRACING=1")
-        add_compile_definitions("CUDA_TRACING=1")
+    message("Enable NVTX calls to trace and profile with CUDA Nsight")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCUDA_TRACING=1")
+    #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -DCUDA_TRACING=1")
+    add_compile_definitions("CUDA_TRACING=1")
 endif ()
 unset(CUDA_TRACING CACHE)
 
@@ -70,7 +83,6 @@ message("rdma-core found at ${RDMA_CORE_HOME}")
 
 
 #set(CUDA_ARCHITECTURES "75;80;89" CACHE STRING "CUDA architectures to pass to NVCC")
-set(CUDA_ARCHITECTURES ${CUDA_ARCHITECTURES} CACHE STRING "CUDA architectures to pass to NVCC")
 
 #set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -95,7 +107,7 @@ message("INCLUDE  ${RDMA_CORE_INCLUDE} ${RDMA_CORE_INCLUDE_SRC} ${RDMA_CORE_INCL
 
 link_directories(
     ${RDMA_CORE_LIB}
-)
+    )
 
 
 # Introduce variables:
@@ -125,12 +137,13 @@ target_link_libraries(rdma-shim
     ibverbs)
 
 
-add_library(rdma-shim-cuda STATIC rdma_shim.cu)
-set_target_properties(rdma-shim-cuda PROPERTIES CUDA_ARCHITECTURES ${CUDA_ARCHITECTURES}
-        CUDA_SEPARABLE_COMPILATION ON
-        POSITION_INDEPENDENT_CODE ON
-        CUDA_RESOLVE_DEVICE_SYMBOLS ON
-        )
+add_library(rdma-shim-cuda STATIC rdma_shim.cu cuda_utils.cu)
+set_target_properties(rdma-shim-cuda PROPERTIES
+    CUDA_ARCHITECTURES "${CUDA_ARCHITECTURES}"
+    CUDA_SEPARABLE_COMPILATION ON
+    POSITION_INDEPENDENT_CODE ON
+    # CUDA_RESOLVE_DEVICE_SYMBOLS ON
+    )
 
 target_compile_options(rdma-shim-cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--keep>)
 
@@ -144,7 +157,7 @@ target_link_libraries(rdma-shim-cuda
     ibverbs
     cuda
     rdma-shim
-)
+    )
 
 # add_library(rdma-shim-cuda-shared SHARED rdma_shim.cu)
 # set_target_properties(rdma-shim-cuda-shared PROPERTIES CUDA_ARCHITECTURES ${CUDA_ARCHITECTURES}
