@@ -68,11 +68,10 @@ void mlx5_unlock_qp(struct mlx5_qp *mqp) {
     // mlx5_qp_unlock(&mqp->sq.lock);
 }
 
-
 // This is the "big function" that setup the rdma stack to be used in our calls
-// Basically, all the relevant memory addresses are extracted from the internal structures
-// And exported in a custom "rdma_shim_data" struct, which could be passed around
-// without any further dependency
+// Basically, all the relevant memory addresses are extracted from the internal
+// structures And exported in a custom "rdma_shim_data" struct, which could be
+// passed around without any further dependency
 
 uint64_t prepare_rdma(struct ibv_qp *qp, struct rdma_shim_data *data,
                       void **lowest_p, void **highest_p) {
@@ -198,7 +197,6 @@ struct mlx5_wqe_ctrl_seg *get_ctrl_seg_ptr(struct rdma_shim_data *data,
                                         (idx << MLX5_SEND_WQE_SHIFT));
 }
 
-
 // THis is a write with immediate, but doesnt actually write anything
 void rdma_write_with_imm(struct rdma_shim_data *data, int imm) {
     mlx5_lock_qp(data->mqp); // This is unlikely to work on GPU!
@@ -262,7 +260,6 @@ void mlx5_bf_copy3(struct rdma_shim_data *data, int bytes, void *ctrl) {
     mmio_flush_writes();
 }
 
-
 // Use these to access the sizes of the structs from the C++ code (we don't want
 // to import everything)
 int sizeof_mlx5_qp() { return sizeof(struct mlx5_qp); }
@@ -284,11 +281,9 @@ void *custom_malloc_buffer;
 size_t custom_malloc_buffer_size;
 size_t allocated_malloc_buffer_size;
 
-
-
-
-// This is the trick that allows us to re-define the calloc and malloc in the rdma-core
-// so that we can use a custom allocator, on the GPU memory in our case
+// This is the trick that allows us to re-define the calloc and malloc in the
+// rdma-core so that we can use a custom allocator, on the GPU memory in our
+// case
 
 void *rdma_shim_malloc(int size) {
     if (size < (custom_malloc_buffer_size - allocated_malloc_buffer_size)) {

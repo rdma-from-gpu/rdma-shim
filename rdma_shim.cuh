@@ -23,8 +23,6 @@ __device__ __host__ void rdma_write_with_imm_cu(struct rdma_shim_data *data,
 
 __host__ __device__ void consume_cqe_cu(struct rdma_shim_data *data) ;
 __global__ void consume_cqe_kernel(struct rdma_shim_data *data);
-__host__ void register_cuda_areas(struct rdma_shim_data *data);
-__host__ void register_cuda_driver_data(void * driver_data, size_t driver_data_size);
 
 __global__ void rdma_write_with_imm_kernel_multiple(struct rdma_shim_data *data,
                                            void *buffer, size_t size,
