@@ -1,5 +1,9 @@
 # rdma-shim
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13332372.svg)](https://doi.org/10.5281/zenodo.13332372)
+
+
+
 This library provides the essential CUDA implementation to do RDMA operations on a mlx5-supported card.
 This needs a custom version of `rdma-core` which exposes some internals, available [here](https://github.com/rdma-from-gpu/rdma-core).
 
