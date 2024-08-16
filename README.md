@@ -5,8 +5,9 @@ This needs a custom version of `rdma-core` which exposes some internals, availab
 
 # License
 
-(C) 2024 Massimo Girondi girondi@kth.se
-(C) 2024 Mariano Scazzariello marianos@kth.se
+(C) 2023-2024 Massimo Girondi girondi@kth.se
+
+(C) 2023 Mariano Scazzariello marianos@kth.se
 
 The original code in this repository is licensed under the GNU GPL v3 license. See [LICENSE](LICENSE).
 
